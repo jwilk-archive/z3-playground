@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+# encoding=UTF-8
+
+'''
+Solve the following puzzle:
+
+  DO + RE + MI + FA + LA + SI == SOL
+  different letters stand for different digits
+  find the biggest possible number SOL
+'''
+
+from __future__ import print_function
+import sys
+
+import z3
+
+solver = z3.Solver()
+all_vars = a, d, e, f, i, l, m, o, r, s = z3.BitVecs('a d e f i l m o r s', 10)
+for v in all_vars:
+    solver.add(v >= 0)
+    solver.add(v <= 9)
+    for w in all_vars:
+        if id(v) < id(w):
+            solver.add(v != w)
+for v in d, r, m, f, l, s:
+    solver.add(v > 0)
+solver.add(
+    10 * d + o +
+    10 * r + e +
+    10 * m + i +
+    10 * f + a +
+    10 * l + a +
+    10 * s + i ==
+    100 * s + 10 * o + l
+)
+solver.push()
+while solver.check() == z3.sat:
+    model = solver.model()
+    print(model[s], model[o], model[l], sep='')
+    sys.stdout.flush()
+    solver.pop()
+    solver.push()
+    solver.add(z3.Or(
+        s > model[s],
+        z3.And(s == model[s], o > model[o]),
+        z3.And(s == model[s], o == model[o], l > model[l]),
+    ))
+
+# vim:ts=4 sts=4 sw=4 et
