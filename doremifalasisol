@@ -13,6 +13,7 @@ Solve the following puzzle:
 '''
 
 from __future__ import print_function
+
 import sys
 
 import z3
